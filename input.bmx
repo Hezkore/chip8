@@ -35,9 +35,11 @@ Type TInput
 		Next
 	EndMethod
 	
-	Method SetKeyStates()
+	Method SetKeyState(key:Int, down:Int)
 		For Local i:Byte = 0 Until Self.Keycodes.Length
-			If KeyDown(Self.Keycodes[i]) Then
+			If key <> Self.Keycodes[i] Continue
+			
+			If down Then
 				If Self.KeysDown[i] Continue
 				Self.KeysDown[i] = True
 				Self.LastKeyHit = i

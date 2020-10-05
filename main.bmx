@@ -1,18 +1,20 @@
 SuperStrict
 
 Framework brl.glmax2d
-Import brl.standardio
-Import brl.retro
+Import maxgui.drivers
+Import brl.eventqueue
 
 Import "renderer.bmx"
 Import "input.bmx"
 Import "cpu.bmx"
 Import "audio.bmx"
 
-Local testRenderer:TRenderer = New TRenderer
+Local window:TGadget=CreateWindow("BlitzMax CHIP-8 Emulator",0,0,64*14,32*14,Null,WINDOW_RESIZABLE|WINDOW_CENTER|WINDOW_TITLEBAR|WINDOW_CLIENTCOORDS)
+Local canvas:TGadget=CreateCanvas(0,0,ClientWidth(window),ClientHeight(window),window)
+SetGadgetLayout( canvas, EDGE_ALIGNED, EDGE_ALIGNED, EDGE_ALIGNED, EDGE_ALIGNED )
+ActivateGadget( canvas )
 
-AppTitle = "BlitzMax CHIP-8 Emulator"
-Graphics(testRenderer.WIDTH * 14, testRenderer.HEIGHT * 14, 0)
+Local testRenderer:TRenderer = New TRenderer
 
 Local testInput:TInput = New TInput
 
@@ -29,9 +31,7 @@ Local hertzLast:Int = hertzNow
 Local hertzElapsed:Int
 Local hertzStep:Int
 
-While Not AppTerminate() And Not KeyDown(KEY_ESCAPE)
-	
-	testInput.SetKeyStates()
+While True
 	
 	hertzNow = Millisecs()
 	hertzElapsed:+hertzNow - hertzLast
@@ -42,39 +42,60 @@ While Not AppTerminate() And Not KeyDown(KEY_ESCAPE)
 		testCPU.Cycle()
 	WEnd
 	
-	SetBlend(ALPHABLEND)
-	testRenderer.SetColor()
-	Cls()
-	
-	testRenderer.Render()
-	
-	' Cell shadow
-	SetAlpha(0.5)
-	DrawImageRect(testRenderer.ImageBlur, GraphicsWidth() *.005, GraphicsHeight() *.0075, GraphicsWidth(), GraphicsHeight())
-	
-	' Cell spread
-	SetAlpha(0.5)
-	DrawImageRect(testRenderer.ImageBlur, 0, 0, GraphicsWidth(), GraphicsHeight())
-	
-	' Scanlines
-	Local scanStep:Float = GraphicsHeight() / testRenderer.Height
-	For Local y:Int = 0 Until GraphicsHeight() / scanStep
-		SetBlend(LIGHTBLEND)
-		SetAlpha(0.012)
-		SetColor(255, 255, 255)
-		DrawLine(0, y * scanStep + 1, GraphicsWidth(), y * scanStep + 1)
-		
-		SetBlend(ALPHABLEND)
-		SetAlpha(0.02)
-		SetColor(0, 0, 0)
-		DrawLine(0, y * scanStep, GraphicsWidth(), y * scanStep)
-	Next
-	
-	' Cell
-	testRenderer.SetColor()
-	SetAlpha(1)
-	DrawImageRect(testRenderer.Image, 0, 0, GraphicsWidth(), GraphicsHeight())
-	
-	Flip(0)
-WEnd
-End
+	While PollEvent()
+		Select EventID()
+			Case EVENT_KEYDOWN
+				testInput.SetKeyState(EventData(), True)
+				
+			Case EVENT_KEYUP
+				testInput.SetKeyState(EventData(), False)
+				
+			Case EVENT_GADGETPAINT
+				SetGraphics(CanvasGraphics(canvas))
+				SetViewport( 0,0, ClientWidth(canvas), ClientHeight(canvas) )
+				
+				SetBlend(ALPHABLEND)
+				testRenderer.SetColor()
+				Cls()
+				
+				testRenderer.Render()
+				
+				' Cell shadow
+				SetAlpha(0.5)
+				DrawImageRect(testRenderer.ImageBlur, GraphicsWidth() *.005, GraphicsHeight() *.0075, GraphicsWidth(), GraphicsHeight())
+				
+				' Cell spread
+				SetAlpha(0.5)
+				DrawImageRect(testRenderer.ImageBlur, 0, 0, GraphicsWidth(), GraphicsHeight())
+				
+				' Scanlines
+				Local scanStep:Float = GraphicsHeight() / testRenderer.Height
+				For Local y:Int = 0 Until GraphicsHeight() / scanStep
+					SetBlend(LIGHTBLEND)
+					SetAlpha(0.012)
+					SetColor(255, 255, 255)
+					DrawLine(0, y * scanStep + 1, GraphicsWidth(), y * scanStep + 1)
+					
+					SetBlend(ALPHABLEND)
+					SetAlpha(0.02)
+					SetColor(0, 0, 0)
+					DrawLine(0, y * scanStep, GraphicsWidth(), y * scanStep)
+				Next
+				
+				' Cell
+				testRenderer.SetColor()
+				SetAlpha(1)
+				DrawImageRect(testRenderer.Image, 0, 0, GraphicsWidth(), GraphicsHeight())
+				
+				Flip(1)
+				
+			Case EVENT_WINDOWCLOSE
+				FreeGadget(canvas)
+				End
+
+			Case EVENT_APPTERMINATE
+				End
+		EndSelect
+	Wend
+	RedrawGadget( canvas )
+Wend

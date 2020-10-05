@@ -28,4 +28,3 @@ A highly experimental [CHIP-8](https://en.wikipedia.org/wiki/CHIP-8) emulator wr
 |Q|W|E|R
 |A|S|D|F
 |Z|X|C|V
-|
