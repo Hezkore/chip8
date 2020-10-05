@@ -21,3 +21,11 @@ A highly experimental [CHIP-8](https://en.wikipedia.org/wiki/CHIP-8) emulator wr
 * Open `main.bmx`
 * Change `LoadROM` to load a local ROM file
 * Compile & Run
+
+## Keymap
+|1|2|3|4
+|-|-|-|-
+|Q|W|E|R
+|A|S|D|F
+|Z|X|C|V
+|
