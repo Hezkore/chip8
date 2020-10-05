@@ -4,6 +4,8 @@ Framework brl.glmax2d
 Import maxgui.drivers
 Import brl.eventqueue
 
+Import "cpu/cpu.bmx"
+
 Import "renderer.bmx"
 Import "input.bmx"
 Import "cpu.bmx"
@@ -14,6 +16,7 @@ Local canvas:TGadget=CreateCanvas(0,0,ClientWidth(window),ClientHeight(window),w
 SetGadgetLayout( canvas, EDGE_ALIGNED, EDGE_ALIGNED, EDGE_ALIGNED, EDGE_ALIGNED )
 ActivateGadget( canvas )
 
+
 Local testRenderer:TRenderer = New TRenderer
 
 Local testInput:TInput = New TInput
@@ -21,6 +24,11 @@ Local testInput:TInput = New TInput
 Local testAudio:TAudio = New TAudio
 
 Local testCPU:TCPU = New TCPU(testRenderer, testInput, testAudio)
+
+CurrentCPU = TBaseCPU.GetCPU("CHIP-8")
+Print "Current CPU is " + CurrentCPU.Name
+CurrentCPU.Execute("00E0")
+End
 
 testCPU.LoadROM("dev\RUSH_HOUR")
 
