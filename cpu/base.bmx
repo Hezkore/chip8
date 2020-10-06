@@ -3,6 +3,9 @@ SuperStrict
 Import brl.objectlist
 Import brl.standardio
 
+Import "..\renderer.bmx"
+Import "..\audio.bmx"
+Import "..\input.bmx"
 Import "opcode.bmx"
 
 Type TBaseCPU
@@ -11,10 +14,13 @@ Type TBaseCPU
 	
 	Field Name:String = "Unknown CPU"
 	Field RegisteredOpcodes:TOpcode[] ' Wanted TStack, but crashes
+	Field DelayTimer:Int
+	Field ProgramCounter:Int
+	Field Paused:Int
 	
-	Method New()
-		
-	EndMethod
+	Field Renderer:TRenderer
+	Field Input:TInput
+	Field Audio:TAudio
 	
 	Method RegisterAsCPU(name:String)
 		Self.Name = name
@@ -54,5 +60,9 @@ Type TBaseCPU
 	
 	Method CopyOpcodesFrom(cpu:TBaseCPU)
 		Self.RegisteredOpcodes[] = cpu.RegisteredOpcodes[..]
+	EndMethod
+	
+	Method Cycle()
+		
 	EndMethod
 EndType

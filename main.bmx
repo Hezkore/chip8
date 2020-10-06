@@ -24,7 +24,7 @@ Local testAudio:TAudio = New TAudio
 
 Local testCPU:TCPU = New TCPU(testRenderer, testInput, testAudio)
 
-'CurrentCPU = TBaseCPU.GetCPU("CHIP-8")
+CurrentCPU = TBaseCPU.GetCPU("CHIP-8")
 'Print "Current CPU is " + CurrentCPU.Name
 'CurrentCPU.Execute("00E0")
 'End
@@ -46,7 +46,8 @@ While True
 	While hertzElapsed >= hertzInterval
 		hertzElapsed:-hertzInterval
 		hertzStep:+1
-		testCPU.Cycle()
+		'testCPU.Cycle()
+		CurrentCPU.Cycle()
 	WEnd
 	
 	While PollEvent()
