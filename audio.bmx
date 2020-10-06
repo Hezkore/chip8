@@ -1,8 +1,7 @@
 SuperStrict
 
 Import brl.freeaudioaudio
-
-SetAudioDriver("FreeAudio DirectSound")
+'Import brl.standardio
 
 Type TAudio
 	
@@ -21,6 +20,10 @@ Type TAudio
 	Field ShortChannel:TChannel
 	
 	Method New()
+		'For Local a:String = EachIn AudioDrivers()
+		'	Print("Audio device found: " + a)
+		'Next
+		SetAudioDriver(AudioDrivers()[0])
 		Self.GenerateSamples()
 	EndMethod
 	

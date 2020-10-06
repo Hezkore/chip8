@@ -3,7 +3,7 @@ SuperStrict
 Import brl.retro
 Import brl.collections
 Import brl.objectlist
-Import brl.randomdefault
+Import brl.random
 
 Import "renderer.bmx"
 Import "input.bmx"

@@ -53,6 +53,6 @@ Type TBaseCPU
 	EndMethod
 	
 	Method CopyOpcodesFrom(cpu:TBaseCPU)
-		Self.RegisteredOpcodes[] = Self.RegisteredOpcodes[..]
+		Self.RegisteredOpcodes[] = cpu.RegisteredOpcodes[..]
 	EndMethod
 EndType

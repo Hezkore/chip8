@@ -16,7 +16,6 @@ Local canvas:TGadget=CreateCanvas(0,0,ClientWidth(window),ClientHeight(window),w
 SetGadgetLayout( canvas, EDGE_ALIGNED, EDGE_ALIGNED, EDGE_ALIGNED, EDGE_ALIGNED )
 ActivateGadget( canvas )
 
-
 Local testRenderer:TRenderer = New TRenderer
 
 Local testInput:TInput = New TInput
@@ -25,10 +24,10 @@ Local testAudio:TAudio = New TAudio
 
 Local testCPU:TCPU = New TCPU(testRenderer, testInput, testAudio)
 
-CurrentCPU = TBaseCPU.GetCPU("CHIP-8")
-Print "Current CPU is " + CurrentCPU.Name
-CurrentCPU.Execute("00E0")
-End
+'CurrentCPU = TBaseCPU.GetCPU("CHIP-8")
+'Print "Current CPU is " + CurrentCPU.Name
+'CurrentCPU.Execute("00E0")
+'End
 
 testCPU.LoadROM("dev\RUSH_HOUR")
 
