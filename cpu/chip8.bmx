@@ -13,9 +13,9 @@ Type TCHIP8CPU Extends TBaseCPU
 		Self.Speed = 10 ' 10 instructions
 		
 		' Register opcodes
-		Self.RegisterOpcode("0", "SYS addr", OP_SYS)
-		Self.RegisterOpcode("00E0", "CLS", OP_CLS)
-		Self.RegisterOpcode("00EE", "RET", OP_RET)
+		Self.RegisterOpcode($0, "SYS addr", OP_SYS)
+		Self.RegisterOpcode($00E0, "CLS", OP_CLS)
+		Self.RegisterOpcode($00EE, "RET", OP_RET)
 	EndMethod
 	
 	Function OP_SYS(opcode:Int)

@@ -60,21 +60,22 @@ Type TBaseCPU
 		Next
 	EndFunction
 	
-	Method GetOpcode:TOpcode(code:String)
-		Local rawCode:Int = Int("$"+code)
-		
-		' Attempt exact match
+	Method GetOpcode:TOpcode(code:Int)
+		Field matches:TOpcode[3]
 		For Local o:TOpcode = EachIn Self.RegisteredOpcodes
-			If o.Code = rawCode Return o
+			If o.Code = code Return o
+			If o.Code & $FFF0 = code & $FFF0 matches[0] = o
+			If o.Code & $FF00 = code & $FF00 matches[1] = o
+			If o.Code & $F000 = code & $F000 matches[2] = o
 		Next
 		
 		' Match against the information we've got registered
-		For Local o:TOpcode = EachIn Self.RegisteredOpcodes
-			If o.CodeHex = Left(code,o.CodeLen) Return o
-		Next
+		'For Local o:TOpcode = EachIn Self.RegisteredOpcodes
+		'	If o.CodeHex & $FF = Left(code,o.CodeLen) Return o
+		'Next
 	EndMethod
 	
-	Method Execute(code:String)
+	Method Execute(code:Int)
 		Local opcode:TOpcode = Self.GetOpcode(code)
 		If opcode And opcode.FunctionPtr opcode.FunctionPtr(Int("$"+code))
 	EndMethod
