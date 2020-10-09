@@ -1,6 +1,7 @@
 SuperStrict
 
 Import brl.standardio
+Import brl.glmax2D
 
 Type TRenderer
 	
@@ -96,15 +97,28 @@ Type TRenderer
 		Next
 	EndMethod
 	
-	Method Render()
+	Method RenderFromPixmap()
 		If Not Self.Dirty Return
 		Self.Dirty = False
+		
+		' Render pixels to pixmap
 		For Local x:Int = 0 Until Self.Width
 		For Local y:Int = 0 Until Self.Height
 			Self.Pixmap.WritePixel(x, y, Self.Pixels[x, y] * - 1)
 		Next
 		Next
+		
+		' Create a blurry and sharp image from pixmap
 		Self.ImageBlur = LoadImage(Self.Pixmap, FILTEREDIMAGE)
 		Self.Image = LoadImage(Self.Pixmap, MASKEDIMAGE)
+	EndMethod
+	
+	Method Render()
+		Self.RenderFromPixmap()
+		
+		SetBlend(ALPHABLEND)
+		Self.SetColor()
+		SetAlpha(1)
+		DrawImageRect(Self.Image, 0, 0, GraphicsWidth(), GraphicsHeight())
 	EndMethod
 EndType

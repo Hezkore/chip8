@@ -9,6 +9,9 @@ Type TCHIP8CPU Extends TBaseCPU
 		' Register Self
 		Self.RegisterAsCPU("CHIP-8")
 		
+		' Setup
+		Self.Speed = 10 ' 10 instructions
+		
 		' Register opcodes
 		Self.RegisterOpcode("0", "SYS addr", OP_SYS)
 		Self.RegisterOpcode("00E0", "CLS", OP_CLS)

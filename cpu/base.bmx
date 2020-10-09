@@ -3,6 +3,7 @@ SuperStrict
 Import brl.objectlist
 Import brl.standardio
 
+Import "..\memory.bmx"
 Import "..\renderer.bmx"
 Import "..\audio.bmx"
 Import "..\input.bmx"
@@ -12,15 +13,21 @@ Type TBaseCPU
 	
 	Global RegisteredCPUs:TObjectList = New TObjectList()
 	
+	' Identity
 	Field Name:String = "Unknown CPU"
 	Field RegisteredOpcodes:TOpcode[] ' Wanted TStack, but crashes
+	
+	' Flow
+	Field Speed:Int = 10
+	Field Paused:Int
 	Field DelayTimer:Int
 	Field ProgramCounter:Int
-	Field Paused:Int
 	
-	Field Renderer:TRenderer
-	Field Input:TInput
-	Field Audio:TAudio
+	' Pointers
+	Field AudioPtr:TAudio
+	Field InputPtr:TInput
+	Field MemoryPtr:TMemory
+	Field RendererPtr:TRenderer
 	
 	Method RegisterAsCPU(name:String)
 		Self.Name = name
@@ -29,6 +36,20 @@ Type TBaseCPU
 	EndMethod
 	
 	Method RegisterOpcode(code:String, desc:String, funcPtr(opcode:Int))
+		' Cleanup
+		code = Upper(code)
+		
+		' Is this already registered?
+		For Local op:TOpcode = EachIn Self.RegisteredOpcodes
+			If op.CodeHex = code Then
+				' Update
+				op.Description = desc
+				op.FunctionPtr = funcPtr
+				Return
+			EndIf
+		Next
+		
+		' Add new
 		Self.RegisteredOpcodes = RegisteredOpcodes[..RegisteredOpcodes.Length+1]
 		Self.RegisteredOpcodes[Self.RegisteredOpcodes.Length-1] = New TOpcode(code, desc, funcPtr)
 	EndMethod
@@ -63,6 +84,26 @@ Type TBaseCPU
 	EndMethod
 	
 	Method Cycle()
+		If Self.Paused Then
+			'If Self.IsWatingForKey And Self.Input.LastKeyHit >= 0 Then
+			'	Self.V[Self.WaitForKeyX] = Self.Input.LastKeyHit
+			'	Self.Paused = False
+			'	Self.IsWatingForKey = False
+			'EndIf
+			Return
+		EndIf
 		
+		Local opcode:Int
+		For Local i:Int = 0 Until Self.Speed
+			'opcode = Self.Memory[Self.ProgramCounter] Shl 8 | Self.Memory[Self.ProgramCounter + 1]
+			opcode = Self.MemoryPtr.GetOpcodeAtIndex(Self.ProgramCounter)
+			Print Right(Hex(opcode),4)
+			'Self.ProgressProgramCounter()
+			'Self.ExecuteInstruction(opcode)
+			If Self.Paused Return
+		Next
+		
+		If Self.DelayTimer > 0 Self.DelayTimer:-1
+		'Self.Audio.Update()
 	EndMethod
 EndType
