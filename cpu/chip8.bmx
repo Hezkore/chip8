@@ -14,25 +14,41 @@ Type TCHIP8CPU Extends TBaseCPU
 		Self.ProgressOnInstruction  = True ' Auto progress forward after every instruction
 		
 		' Register opcodes
-		Self.RegisterOpcode("0", "SYS addr", OP_SYS)
-		Self.RegisterOpcode("00E0", "CLS", OP_CLS)
-		Self.RegisterOpcode("00EE", "RET", OP_RET)
-		Self.RegisterOpcode("1", "JP", OP_JP)
+		Self.RegisterOpcode("0",	OP_SYS,		"SYS")
+		Self.RegisterOpcode("00E0",	OP_CLS,		"CLS")
+		Self.RegisterOpcode("00EE",	OP_RET,		"RET")
+		Self.RegisterOpcode("1",	OP_JP,		"JP")
+		Self.RegisterOpcode("2",	OP_CALL,	"CALL")
+		Self.RegisterOpcode("4",	OP_SNE,		"SNE")
+		Self.RegisterOpcode("A",	OP_LD,		"LD")
 	EndMethod
 	
-	Function OP_SYS(opcode:Int)
-		Print "SYS addr " + opcode
+	Function OP_SYS(opcode:Int, cpu:TBaseCPU)
+		Print "SYS 0x" + Right(Hex(opcode), 4)
 	EndFunction
 	
-	Function OP_CLS(opcode:Int)
+	Function OP_CLS(opcode:Int, cpu:TBaseCPU)
 		Print "CLEARING!"
 	EndFunction
 	
-	Function OP_RET(opcode:Int)
-		Self.ProgramCounter = Self.Stack.Pop()
+	Function OP_RET(opcode:Int, cpu:TBaseCPU)
+		cpu.ProgramCounter = cpu.MemoryPtr.Stack.Pop()
 	EndFunction
 	
-	Function OP_JP(opcode:Int)
-		Self.ProgramCounter = opcode & $FFF
+	Function OP_JP(opcode:Int, cpu:TBaseCPU)
+		cpu.ProgramCounter = opcode & $FFF
+	EndFunction
+	
+	Function OP_CALL(opcode:Int, cpu:TBaseCPU)
+		cpu.MemoryPtr.Stack.Push(cpu.ProgramCounter)
+		cpu.ProgramCounter = opcode & $FFF
+	EndFunction
+	
+	Function OP_SNE(opcode:Int, cpu:TBaseCPU)
+		If cpu.MemoryPtr.V[Self.GetX(opcode)] <> opcode & $FF cpu.ProgressProgramCounter()
+	EndFunction
+	
+	Function OP_LD(opcode:Int, cpu:TBaseCPU)
+		cpu.MemoryPtr.I = opcode & $FFF
 	EndFunction
 EndType

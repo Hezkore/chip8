@@ -7,7 +7,8 @@ Import "..\memory.bmx"
 Import "..\renderer.bmx"
 Import "..\audio.bmx"
 Import "..\input.bmx"
-Import "opcode.bmx"
+
+Include "opcode.bmx"
 
 Type TBaseCPU
 	
@@ -30,13 +31,21 @@ Type TBaseCPU
 	Field MemoryPtr:TMemory
 	Field RendererPtr:TRenderer
 	
+	Method New()
+		Self.Reset()
+	EndMethod
+	
+	Method Reset()
+		Self.ProgramCounter = $200
+	EndMethod
+	
 	Method RegisterAsCPU(name:String)
 		Self.Name = name
 		TBaseCPU.RegisteredCPUs.AddLast(Self)
 		Print("Registered CPU " + Self.Name)
 	EndMethod
 	
-	Method RegisterOpcode(code:String, desc:String, funcPtr(opcode:Int))
+	Method RegisterOpcode(code:String, funcPtr(opcode:Int, cpu:TBaseCPU), pseudo:String)
 		' Code is sent as a string so that we can detect the expected length
 		Local rawCode:Int = Int("$"+code)
 		
@@ -44,7 +53,7 @@ Type TBaseCPU
 		For Local op:TOpcode = EachIn Self.RegisteredOpcodes
 			If op.Code = rawCode Then
 				' Update
-				op.Description = desc
+				op.PseudoCode = pseudo
 				op.FunctionPtr = funcPtr
 				Return
 			EndIf
@@ -52,7 +61,7 @@ Type TBaseCPU
 		
 		' Add new
 		Self.RegisteredOpcodes = RegisteredOpcodes[..RegisteredOpcodes.Length+1]
-		Self.RegisteredOpcodes[Self.RegisteredOpcodes.Length-1] = New TOpcode(code, desc, funcPtr)
+		Self.RegisteredOpcodes[Self.RegisteredOpcodes.Length-1] = New TOpcode(code, funcPtr, pseudo)
 	EndMethod
 	
 	Function GetCPU:TBaseCPU(name:String)
@@ -61,18 +70,27 @@ Type TBaseCPU
 		Next
 	EndFunction
 	
+	Function GetX:Int(opcode:Int)
+		Return (opcode & $0F00) Shr 8
+	EndFunction
+	
+	Function GetY:Int(opcode:Int)
+		Return (opcode & $00F0) Shr 4
+	EndFunction
+	
 	Method GetOpcode:TOpcode(code:Int)
 		'Print "Looking for opcode 0x" + Right(Hex(code),4)
 		Local matches:TOpcode[3]
 		For Local o:TOpcode = EachIn Self.RegisteredOpcodes
 			' TODO make this pretty, please
+			'Print "0x"+Right(Hex(code),4)+"/0x"+Right(Hex(o.Code),4)
 			Select o.CodeLen
 				' Return exact matches
 				Case 4 If o.Code & $FFFF = code & $FFFF Return o
 				' Store similar matches
 				Case 3 If o.Code & $FFF0 = code & $FFF0 matches[0] = o
 				Case 2 If o.Code & $FF00 = code & $FF00 matches[1] = o
-				Case 1 If o.Code & $F000 = code & $F000 matches[2] =  o
+				Case 1 If o.Code & $F000 = code & $F000 matches[2] = o
 			EndSelect
 		Next
 		' Return the best match
@@ -84,10 +102,14 @@ Type TBaseCPU
 	Method Execute(code:Int)
 		Local opcode:TOpcode = Self.GetOpcode(code)
 		If opcode Then
-			If opcode.FunctionPtr opcode.FunctionPtr(code)
+			If opcode.FunctionPtr opcode.FunctionPtr(code, Self)
+			Print("Executing 0x"+Right(Hex(code), 4) + " - " + opcode.PseudoCode)
 		Else
-			Print( "Unknown opcode " + Right(Hex(code), 4) )
-		EndIF
+			Local err:String = "Unknown opcode 0x" + Right(Hex(code), 4)
+			Print(err)
+			Notify(err, True)
+			End
+		EndIf
 	EndMethod
 	
 	Method CopyOpcodesFrom(cpu:TBaseCPU)
