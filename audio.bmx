@@ -1,6 +1,7 @@
 SuperStrict
 
 Import brl.freeaudioaudio
+Import brl.retro
 'Import brl.standardio
 
 Type TAudio

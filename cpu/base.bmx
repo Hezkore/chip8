@@ -22,6 +22,7 @@ Type TBaseCPU
 	Field Paused:Int
 	Field DelayTimer:Int
 	Field ProgramCounter:Int
+	Field ProgressOnInstruction:Int = True
 	
 	' Pointers
 	Field AudioPtr:TAudio
@@ -36,12 +37,12 @@ Type TBaseCPU
 	EndMethod
 	
 	Method RegisterOpcode(code:String, desc:String, funcPtr(opcode:Int))
-		' Cleanup
-		code = Upper(code)
+		' Code is sent as a string so that we can detect the expected length
+		Local rawCode:Int = Int("$"+code)
 		
 		' Is this already registered?
 		For Local op:TOpcode = EachIn Self.RegisteredOpcodes
-			If op.CodeHex = code Then
+			If op.Code = rawCode Then
 				' Update
 				op.Description = desc
 				op.FunctionPtr = funcPtr
@@ -61,23 +62,32 @@ Type TBaseCPU
 	EndFunction
 	
 	Method GetOpcode:TOpcode(code:Int)
-		Field matches:TOpcode[3]
+		'Print "Looking for opcode 0x" + Right(Hex(code),4)
+		Local matches:TOpcode[3]
 		For Local o:TOpcode = EachIn Self.RegisteredOpcodes
-			If o.Code = code Return o
-			If o.Code & $FFF0 = code & $FFF0 matches[0] = o
-			If o.Code & $FF00 = code & $FF00 matches[1] = o
-			If o.Code & $F000 = code & $F000 matches[2] = o
+			' TODO make this pretty, please
+			Select o.CodeLen
+				' Return exact matches
+				Case 4 If o.Code & $FFFF = code & $FFFF Return o
+				' Store similar matches
+				Case 3 If o.Code & $FFF0 = code & $FFF0 matches[0] = o
+				Case 2 If o.Code & $FF00 = code & $FF00 matches[1] = o
+				Case 1 If o.Code & $F000 = code & $F000 matches[2] =  o
+			EndSelect
 		Next
-		
-		' Match against the information we've got registered
-		'For Local o:TOpcode = EachIn Self.RegisteredOpcodes
-		'	If o.CodeHex & $FF = Left(code,o.CodeLen) Return o
-		'Next
+		' Return the best match
+		If matches[0] Return matches[0]
+		If matches[1] Return matches[1]
+		If matches[2] Return matches[2]
 	EndMethod
 	
 	Method Execute(code:Int)
 		Local opcode:TOpcode = Self.GetOpcode(code)
-		If opcode And opcode.FunctionPtr opcode.FunctionPtr(Int("$"+code))
+		If opcode Then
+			If opcode.FunctionPtr opcode.FunctionPtr(code)
+		Else
+			Print( "Unknown opcode " + Right(Hex(code), 4) )
+		EndIF
 	EndMethod
 	
 	Method CopyOpcodesFrom(cpu:TBaseCPU)
@@ -98,13 +108,17 @@ Type TBaseCPU
 		For Local i:Int = 0 Until Self.Speed
 			'opcode = Self.Memory[Self.ProgramCounter] Shl 8 | Self.Memory[Self.ProgramCounter + 1]
 			opcode = Self.MemoryPtr.GetOpcodeAtIndex(Self.ProgramCounter)
-			Print Right(Hex(opcode),4)
-			'Self.ProgressProgramCounter()
+			Self.Execute(opcode)
+			If Self.ProgressOnInstruction Self.ProgressProgramCounter()
 			'Self.ExecuteInstruction(opcode)
 			If Self.Paused Return
 		Next
 		
 		If Self.DelayTimer > 0 Self.DelayTimer:-1
 		'Self.Audio.Update()
+	EndMethod
+	
+	Method ProgressProgramCounter()
+		Self.ProgramCounter:+2
 	EndMethod
 EndType
