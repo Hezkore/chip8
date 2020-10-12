@@ -14,13 +14,20 @@ Type TCHIP8CPU Extends TBaseCPU
 		Self.ProgressOnInstruction  = True ' Auto progress forward after every instruction
 		
 		' Register opcodes
-		Self.RegisterOpcode("0",	OP_SYS,		"SYS")
-		Self.RegisterOpcode("00E0",	OP_CLS,		"CLS")
-		Self.RegisterOpcode("00EE",	OP_RET,		"RET")
-		Self.RegisterOpcode("1",	OP_JP,		"JP")
-		Self.RegisterOpcode("2",	OP_CALL,	"CALL")
-		Self.RegisterOpcode("4",	OP_SNE,		"SNE")
-		Self.RegisterOpcode("A",	OP_LD,		"LD")
+		' First is operational instruction code
+		' Second is the match pattern where, for example, $F0F0 means that the first and third value must be exact
+		' Third is the function to call for this opcode
+		' Forth is the pseudo code name (used for debugging)
+		Self.RegisterOpcode($0000,	$F000,	OP_SYS,		"SYS")
+		Self.RegisterOpcode($00E0,	$FFFF,	OP_CLS,		"CLS")
+		Self.RegisterOpcode($00EE,	$FFFF,	OP_RET,		"RET")
+		Self.RegisterOpcode($1000,	$F000,	OP_JP,		"JP")
+		Self.RegisterOpcode($2000,	$F000,	OP_CALL,	"CALL")
+		Self.RegisterOpcode($4000,	$F000,	OP_SNE,		"SNE")
+		Self.RegisterOpcode($7000,	$F000,	OP_ADDVx,	"ADD Vx")
+		Self.RegisterOpcode($8000,	$F00F,	OP_LDVxVy,	"LD Vx, Vy")
+		Self.RegisterOpcode($A000,	$F000,	OP_LD,		"LD")
+		Self.RegisterOpcode($F065,	$F0FF,	OP_LDVxI,	"LD Vx, [I]")
 	EndMethod
 	
 	Function OP_SYS(opcode:Int, cpu:TBaseCPU)
@@ -50,5 +57,19 @@ Type TCHIP8CPU Extends TBaseCPU
 	
 	Function OP_LD(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.I = opcode & $FFF
+	EndFunction
+	
+	Function OP_ADDVx(opcode:Int, cpu:TBaseCPU)
+		cpu.MemoryPtr.V[cpu.GetX(opcode)]:+opcode & $FF
+	EndFunction
+	
+	Function OP_LDVxI(opcode:Int, cpu:TBaseCPU)
+		For Local index:Int = 0 To cpu.GetX(opcode)
+			cpu.MemoryPtr.V[index] = cpu.MemoryPtr.Memory[cpu.MemoryPtr.I + index]
+		Next
+	EndFunction
+	
+	Function OP_LDVxVy(opcode:Int, cpu:TBaseCPU)
+		cpu.MemoryPtr.V[cpu.GetX(opcode)] = cpu.MemoryPtr.V[cpu.GetY(opcode)]
 	EndFunction
 EndType

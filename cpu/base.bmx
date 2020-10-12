@@ -45,13 +45,10 @@ Type TBaseCPU
 		Print("Registered CPU " + Self.Name)
 	EndMethod
 	
-	Method RegisterOpcode(code:String, funcPtr(opcode:Int, cpu:TBaseCPU), pseudo:String)
-		' Code is sent as a string so that we can detect the expected length
-		Local rawCode:Int = Int("$"+code)
-		
+	Method RegisterOpcode(code:Int, match:Int, funcPtr(opcode:Int, cpu:TBaseCPU), pseudo:String)
 		' Is this already registered?
 		For Local op:TOpcode = EachIn Self.RegisteredOpcodes
-			If op.Code = rawCode Then
+			If op.Code = code And op.Match = match Then
 				' Update
 				op.PseudoCode = pseudo
 				op.FunctionPtr = funcPtr
@@ -61,7 +58,7 @@ Type TBaseCPU
 		
 		' Add new
 		Self.RegisteredOpcodes = RegisteredOpcodes[..RegisteredOpcodes.Length+1]
-		Self.RegisteredOpcodes[Self.RegisteredOpcodes.Length-1] = New TOpcode(code, funcPtr, pseudo)
+		Self.RegisteredOpcodes[Self.RegisteredOpcodes.Length-1] = New TOpcode(code, match, funcPtr, pseudo)
 	EndMethod
 	
 	Function GetCPU:TBaseCPU(name:String)
@@ -79,24 +76,28 @@ Type TBaseCPU
 	EndFunction
 	
 	Method GetOpcode:TOpcode(code:Int)
-		'Print "Looking for opcode 0x" + Right(Hex(code),4)
-		Local matches:TOpcode[3]
+		Local matchScore:Int
+		Local bestMatchScore:Int
+		Local bestMatch:TOpcode
 		For Local o:TOpcode = EachIn Self.RegisteredOpcodes
-			' TODO make this pretty, please
-			'Print "0x"+Right(Hex(code),4)+"/0x"+Right(Hex(o.Code),4)
-			Select o.CodeLen
-				' Return exact matches
-				Case 4 If o.Code & $FFFF = code & $FFFF Return o
-				' Store similar matches
-				Case 3 If o.Code & $FFF0 = code & $FFF0 matches[0] = o
-				Case 2 If o.Code & $FF00 = code & $FF00 matches[1] = o
-				Case 1 If o.Code & $F000 = code & $F000 matches[2] = o
-			EndSelect
+			matchScore = 0
+			If o.Match = $FFFF Then
+				' Return exact match
+				If o.Code = code Return o
+			Else
+				' Store match
+				If o.Code & o.Match = code & o.Match Then
+					For Local i:int = 0 Until 4
+						If (o.Match SHR (4*i)) & $000F matchScore:+1
+					Next
+					If bestMatchScore <= matchScore Then
+						bestMatchScore = matchScore
+						bestMatch = o
+					EndIf
+				EndIf
+			EndIf
 		Next
-		' Return the best match
-		If matches[0] Return matches[0]
-		If matches[1] Return matches[1]
-		If matches[2] Return matches[2]
+		Return bestMatch
 	EndMethod
 	
 	Method Execute(code:Int)

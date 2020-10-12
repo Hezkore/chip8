@@ -41,29 +41,6 @@ Type TRenderer
 		Self.Pixmap = CreatePixmap(Self.Width, Self.Height, PF_A8)
 	EndMethod
 	
-	Method ScrollV(dist:Int)
-		' TODO Make this a whole lot better
-		If dist > 0 Then
-			For Local x:Int = 1 Until Self.Width
-			For Local y:Int = 1 Until Self.Height
-				Self.Pixels[x, y] = Self.Pixels[x, y + dist]
-			Next
-			Next
-		Else
-			For Local x:Int = Self.Width - 1 Until 0 Step - 1
-			For Local y:Int = Self.Height - 1 Until 0 Step - 1
-				Self.Pixels[x, y] = Self.Pixels[x, y + dist]
-			Next
-			Next
-		EndIf
-		
-		Self.Dirty = True
-	EndMethod
-	
-	Method ScrollH(dist:Int)
-		' TODO Implement this
-	EndMethod
-	
 	Method TogglePixel:Byte(x:Int, y:Int)
 		' So every emulator seems to handle this differently
 		
