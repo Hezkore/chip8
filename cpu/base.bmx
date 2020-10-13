@@ -105,7 +105,7 @@ Type TBaseCPU
 	Method ExecuteInstruction(code:Int)
 		Local opcode:TOpcode = Self.GetOpcode(code)
 		If opcode Then
-			Print("Executing 0x"+Right(Hex(code), 4) + " - (0x"+Right(Hex(opcode.Code), 4)+")" + opcode.PseudoCode)
+			'Print(Right(Hex(Self.ProgramCounter), 4) + " - 0x"+Right(Hex(code), 4) + " ~t (0x"+Right(Hex(opcode.Code), 4)+")" + opcode.PseudoCode)
 			If opcode.FunctionPtr opcode.FunctionPtr(code, Self)
 		Else
 			Local err:String = "Unknown opcode 0x" + Right(Hex(code), 4)
@@ -132,13 +132,13 @@ Type TBaseCPU
 		Local opcode:Int
 		For Local i:Int = 0 Until Self.Speed
 			opcode = Self.MemoryPtr.GetOpcodeAtIndex(Self.ProgramCounter)
-			Self.ExecuteInstruction(opcode)
 			If Self.ProgressOnInstruction Self.ProgressProgramCounter()
+			Self.ExecuteInstruction(opcode)
 			If Self.Paused Return
 		Next
 		
 		If Self.DelayTimer > 0 Self.DelayTimer:-1
-		'Self.Audio.Update()
+		Self.AudioPtr.Update()
 	EndMethod
 	
 	Method ProgressProgramCounter()

@@ -10,7 +10,7 @@ Type TAudio
 	
 	Field SoundTimer:Int
 	
-	' Since audio is slow, we need to pad the timing a little
+	' Since audio is slow, we need to pad the timing a little bit
 	' Otherwise we won't hear anything
 	Field PadLongTime:Int = 2
 	
