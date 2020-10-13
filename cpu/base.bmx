@@ -45,13 +45,14 @@ Type TBaseCPU
 		Print("Registered CPU " + Self.Name)
 	EndMethod
 	
-	Method RegisterOpcode(code:Int, match:Int, funcPtr(opcode:Int, cpu:TBaseCPU), pseudo:String)
+	Method RegisterOpcode(code:Int, match:Int, funcPtr(opcode:Int, cpu:TBaseCPU), pseudo:String, desc:String)
 		' Is this already registered?
 		For Local op:TOpcode = EachIn Self.RegisteredOpcodes
 			If op.Code = code And op.Match = match Then
 				' Update
-				op.PseudoCode = pseudo
 				op.FunctionPtr = funcPtr
+				op.PseudoCode = pseudo
+				op.Description = desc
 				Return
 			EndIf
 		Next
@@ -68,11 +69,11 @@ Type TBaseCPU
 	EndFunction
 	
 	Function GetX:Int(opcode:Int)
-		Return (opcode & $0F00) Shr 8
+		Return (opcode & $0F00) SHR 8
 	EndFunction
 	
 	Function GetY:Int(opcode:Int)
-		Return (opcode & $00F0) Shr 4
+		Return (opcode & $00F0) SHR 4
 	EndFunction
 	
 	Method GetOpcode:TOpcode(code:Int)
@@ -87,10 +88,11 @@ Type TBaseCPU
 			Else
 				' Store match
 				If o.Code & o.Match = code & o.Match Then
+					' TODO Make this prettier
 					For Local i:int = 0 Until 4
 						If (o.Match SHR (4*i)) & $000F matchScore:+1
 					Next
-					If bestMatchScore <= matchScore Then
+					If matchScore > 0 And bestMatchScore <= matchScore Then
 						bestMatchScore = matchScore
 						bestMatch = o
 					EndIf
@@ -100,11 +102,11 @@ Type TBaseCPU
 		Return bestMatch
 	EndMethod
 	
-	Method Execute(code:Int)
+	Method ExecuteInstruction(code:Int)
 		Local opcode:TOpcode = Self.GetOpcode(code)
 		If opcode Then
+			Print("Executing 0x"+Right(Hex(code), 4) + " - (0x"+Right(Hex(opcode.Code), 4)+")" + opcode.PseudoCode)
 			If opcode.FunctionPtr opcode.FunctionPtr(code, Self)
-			Print("Executing 0x"+Right(Hex(code), 4) + " - " + opcode.PseudoCode)
 		Else
 			Local err:String = "Unknown opcode 0x" + Right(Hex(code), 4)
 			Print(err)
@@ -119,21 +121,19 @@ Type TBaseCPU
 	
 	Method Cycle()
 		If Self.Paused Then
-			'If Self.IsWatingForKey And Self.Input.LastKeyHit >= 0 Then
-			'	Self.V[Self.WaitForKeyX] = Self.Input.LastKeyHit
-			'	Self.Paused = False
-			'	Self.IsWatingForKey = False
-			'EndIf
+			If Self.InputPtr.WaitingForKey And Self.InputPtr.LastKeyHit >= 0 Then
+				Self.MemoryPtr.V[Self.InputPtr.WaitingForKeyToX] = Self.InputPtr.LastKeyHit
+				Self.Paused = False
+				Self.InputPtr.WaitingForKey = False
+			EndIf
 			Return
 		EndIf
 		
 		Local opcode:Int
 		For Local i:Int = 0 Until Self.Speed
-			'opcode = Self.Memory[Self.ProgramCounter] Shl 8 | Self.Memory[Self.ProgramCounter + 1]
 			opcode = Self.MemoryPtr.GetOpcodeAtIndex(Self.ProgramCounter)
-			Self.Execute(opcode)
+			Self.ExecuteInstruction(opcode)
 			If Self.ProgressOnInstruction Self.ProgressProgramCounter()
-			'Self.ExecuteInstruction(opcode)
 			If Self.Paused Return
 		Next
 		

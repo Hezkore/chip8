@@ -15,7 +15,7 @@ Type TMemory
 	EndMethod
 	
 	Method GetOpcodeAtIndex:Int(index:Int)
-		If index >= Self.Memory.Length - $200 Return 0
+		If index >= Self.Memory.Length Return -1
 		Return Self.Memory[index] Shl 8 | Self.Memory[index + 1]
 	EndMethod
 	

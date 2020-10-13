@@ -23,6 +23,8 @@ Type TInput
 		86 .. ' V
 	]
 	Field KeysDown:Int[Keycodes.Length]
+	Field WaitingForKey:Int
+	Field WaitingForKeyToX:Int
 	Field LastKeyHit:Int = -1
 	
 	Method IsKeyDown:Int(code:Int)
