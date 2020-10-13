@@ -1,8 +1,7 @@
 SuperStrict
 
 Import brl.freeaudioaudio
-
-SetAudioDriver("FreeAudio DirectSound")
+Import brl.retro
 
 Type TAudio
 	
@@ -10,7 +9,7 @@ Type TAudio
 	
 	Field SoundTimer:Int
 	
-	' Since audio is slow, we need to pad the timing a little
+	' Since audio is slow, we need to pad the timing a little bit
 	' Otherwise we won't hear anything
 	Field PadLongTime:Int = 2
 	
@@ -21,6 +20,10 @@ Type TAudio
 	Field ShortChannel:TChannel
 	
 	Method New()
+		'For Local a:String = EachIn AudioDrivers()
+		'	Print("Audio device found: " + a)
+		'Next
+		SetAudioDriver(AudioDrivers()[0])
 		Self.GenerateSamples()
 	EndMethod
 	
@@ -72,5 +75,10 @@ Type TAudio
 		Else
 			PauseChannel(Self.LongChannel)
 		EndIf
+	EndMethod
+	
+	Method Reset()
+		Self.SoundTimer = 0
+		Update()
 	EndMethod
 EndType

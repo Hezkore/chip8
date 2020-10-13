@@ -1,8 +1,5 @@
 SuperStrict
 
-Import brl.standardio
-Import brl.retro
-
 Type TInput
 	
 	Field Keycodes:Int[] = [ ..
@@ -23,6 +20,8 @@ Type TInput
 		86 .. ' V
 	]
 	Field KeysDown:Int[Keycodes.Length]
+	Field WaitingForKey:Int
+	Field WaitingForKeyToX:Int
 	Field LastKeyHit:Int = -1
 	
 	Method IsKeyDown:Int(code:Int)
@@ -47,5 +46,14 @@ Type TInput
 				Self.KeysDown[i] = False
 			EndIf
 		Next
+	EndMethod
+	
+	Method Reset()
+		For Local i:Byte = 0 Until Self.KeysDown.Length
+			Self.KeysDown[i] = False
+		Next
+		Self.LastKeyHit = -1
+		Self.WaitingForKey = False
+		Self.WaitingForKeyToX = 0
 	EndMethod
 EndType

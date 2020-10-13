@@ -1,6 +1,6 @@
 SuperStrict
 
-Import brl.standardio
+Import brl.glmax2D
 
 Type TRenderer
 	
@@ -40,29 +40,6 @@ Type TRenderer
 		Self.Pixmap = CreatePixmap(Self.Width, Self.Height, PF_A8)
 	EndMethod
 	
-	Method ScrollV(dist:Int)
-		' TODO Make this a whole lot better
-		If dist > 0 Then
-			For Local x:Int = 1 Until Self.Width
-			For Local y:Int = 1 Until Self.Height
-				Self.Pixels[x, y] = Self.Pixels[x, y + dist]
-			Next
-			Next
-		Else
-			For Local x:Int = Self.Width - 1 Until 0 Step - 1
-			For Local y:Int = Self.Height - 1 Until 0 Step - 1
-				Self.Pixels[x, y] = Self.Pixels[x, y + dist]
-			Next
-			Next
-		EndIf
-		
-		Self.Dirty = True
-	EndMethod
-	
-	Method ScrollH(dist:Int)
-		' TODO Implement this
-	EndMethod
-	
 	Method TogglePixel:Byte(x:Int, y:Int)
 		' So every emulator seems to handle this differently
 		
@@ -96,15 +73,59 @@ Type TRenderer
 		Next
 	EndMethod
 	
-	Method Render()
+	Method RenderFromPixmap()
 		If Not Self.Dirty Return
 		Self.Dirty = False
+		
+		' Render pixels to pixmap
 		For Local x:Int = 0 Until Self.Width
 		For Local y:Int = 0 Until Self.Height
 			Self.Pixmap.WritePixel(x, y, Self.Pixels[x, y] * - 1)
 		Next
 		Next
+		
+		' Create a blurry and sharp image from pixmap
 		Self.ImageBlur = LoadImage(Self.Pixmap, FILTEREDIMAGE)
 		Self.Image = LoadImage(Self.Pixmap, MASKEDIMAGE)
+	EndMethod
+	
+	Method Render(drawWidth:Int = -1, drawHeight:Int = -1)
+		If drawWidth = -1 And drawHeight = -1 Then
+			drawWidth = GraphicsWidth()
+			drawHeight = GraphicsHeight()
+		EndIf
+		Self.RenderFromPixmap()
+		Self.SetColor()
+		
+		' Cell shadow
+		SetAlpha(0.5)
+		DrawImageRect(Self.ImageBlur, drawWidth *.005, drawHeight *.0075, drawWidth, drawHeight)
+		
+		' Cell spread
+		SetAlpha(0.5)
+		DrawImageRect(Self.ImageBlur, 0, 0, drawWidth, drawHeight)
+		
+		' Scanlines
+		Local scanStep:Float = drawHeight / Self.Height
+		For Local y:Int = 0 Until drawHeight / scanStep
+			SetBlend(LIGHTBLEND)
+			SetAlpha(0.012)
+			SetColor(255, 255, 255)
+			DrawLine(0, y * scanStep + 1, drawWidth, y * scanStep + 1)
+			
+			SetBlend(ALPHABLEND)
+			SetAlpha(0.02)
+			SetColor(0, 0, 0)
+			DrawLine(0, y * scanStep, drawWidth, y * scanStep)
+		Next
+		
+		' Cell
+		Self.SetColor()
+		SetAlpha(1)
+		DrawImageRect(Self.Image, 0, 0, drawWidth, drawHeight)
+	EndMethod
+	
+	Method Reset()
+		Self.Clear()
 	EndMethod
 EndType
