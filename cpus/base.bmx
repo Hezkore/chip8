@@ -1,15 +1,21 @@
+' Base for CHIP-8 CPUs
+' TBaseCPU & TOpcode
+
 SuperStrict
 
 Import brl.objectlist
-Import brl.standardio
+?win32
+	Import brl.randomdefault
+?not win32
+	Import brl.random
+?
 
-Import "..\memory.bmx"
-Import "..\renderer.bmx"
-Import "..\audio.bmx"
-Import "..\input.bmx"
+Import "../memory.bmx"
+Import "../renderer.bmx"
+Import "../audio.bmx"
+Import "../input.bmx"
 
-Include "opcode.bmx"
-
+' TBaseCPU
 Type TBaseCPU
 	
 	Global RegisteredCPUs:TObjectList = New TObjectList()
@@ -19,6 +25,7 @@ Type TBaseCPU
 	Field RegisteredOpcodes:TOpcode[] ' Wanted TStack, but crashes
 	
 	' Flow
+	Field Hertz:Int = 60
 	Field Speed:Int = 10
 	Field Paused:Int
 	Field DelayTimer:Int
@@ -37,6 +44,8 @@ Type TBaseCPU
 	
 	Method Reset()
 		Self.ProgramCounter = $200
+		Self.Paused = False
+		Self.DelayTimer = 0
 	EndMethod
 	
 	Method RegisterAsCPU(name:String)
@@ -143,5 +152,23 @@ Type TBaseCPU
 	
 	Method ProgressProgramCounter()
 		Self.ProgramCounter:+2
+	EndMethod
+EndType
+
+' TOpcode
+Type TOpcode
+	
+	Field Code:Int
+	Field Match:Int
+	Field PseudoCode:String
+	Field Description:String
+	Field FunctionPtr(opcode:Int, cpu:TBaseCPU)
+	
+	Method New(code:Int, match:Int, funcPtr(opcode:Int, cpu:TBaseCPU), pseudo:String = "UNK", desc:String = "Unknown")
+		Self.Code = code
+		Self.Match = match
+		Self.FunctionPtr = funcPtr
+		Self.PseudoCode = pseudo
+		Self.Description = desc
 	EndMethod
 EndType

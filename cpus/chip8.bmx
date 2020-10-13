@@ -10,11 +10,12 @@ Type TCHIP8CPU Extends TBaseCPU
 		Self.RegisterAsCPU("CHIP-8")
 		
 		' Setup
+		Self.Hertz = 60
 		Self.Speed = 10 ' Instructions per cycle
 		Self.ProgressOnInstruction  = True ' Auto progress forward after every instruction
 		
 		' Register opcodes
-		Self.RegisterOpcode($0000, $F000, OP_SYSa,		"SYS addr",			"Jump to a machine code routine at nnn")
+		'Self.RegisterOpcode($0000, $F000, OP_SYSa,		"SYS addr",			"Jump to a machine code routine at nnn")
 		Self.RegisterOpcode($00E0, $FFFF, OP_CLS,		"CLS",				"Clear the display")
 		Self.RegisterOpcode($00EE, $FFFF, OP_RET,		"RET",				"Return from a subroutine")
 		Self.RegisterOpcode($1000, $F000, OP_JPa,		"JP addr",			"Jump to location nnn")
@@ -52,7 +53,6 @@ Type TCHIP8CPU Extends TBaseCPU
 	EndMethod
 	
 	Function OP_SYSa(opcode:Int, cpu:TBaseCPU)
-		End
 	EndFunction
 	
 	Function OP_CLS(opcode:Int, cpu:TBaseCPU)

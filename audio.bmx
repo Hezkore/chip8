@@ -2,7 +2,6 @@ SuperStrict
 
 Import brl.freeaudioaudio
 Import brl.retro
-'Import brl.standardio
 
 Type TAudio
 	
@@ -76,5 +75,10 @@ Type TAudio
 		Else
 			PauseChannel(Self.LongChannel)
 		EndIf
+	EndMethod
+	
+	Method Reset()
+		Self.SoundTimer = 0
+		Update()
 	EndMethod
 EndType

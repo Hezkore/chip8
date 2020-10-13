@@ -11,7 +11,11 @@ Local MainWindow:TWindow = New TWindow
 ' Create the CHIP-8 machine
 Local Machine:TCHIP8Machine = New TCHIP8Machine
 Machine.ChangeCPU("CHIP-8")
-If Not Machine.LoadROM("dev/RUSH_HOUR") Print("Unable to load ROM"); End
+
+' Wait for ROM
+Repeat 
+	MainWindow.Update(Machine)
+Until Machine.Running()
 
 ' Dump the entire ROM
 Rem

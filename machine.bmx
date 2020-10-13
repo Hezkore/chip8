@@ -1,42 +1,65 @@
 SuperStrict
 
 Import "audio.bmx"
-Import "cpu/cpu.bmx"
+Import "cpu.bmx"
 Import "input.bmx"
 Import "memory.bmx"
 Import "renderer.bmx"
 
 Type TCHIP8Machine
 	
-	Field Audio:TAudio = New TAudio
 	Field CPU:TBaseCPU
+	Field Audio:TAudio = New TAudio
 	Field Input:TInput = New TInput
 	Field Memory:TMemory = New TMemory
 	Field Renderer:TRenderer = New TRenderer
 	
-	Field hertz:Int = 60
-	Field hertzInterval:Double = 1000.0 / hertz
-	Field hertzNow:Int = Millisecs()
-	Field hertzLast:Int = hertzNow
-	Field hertzElapsed:Int
-	Field hertzStep:Int
+	Private
+		Field HertzInterval:Double
+		Field HertzNow:Int = Millisecs()
+		Field HertzLast:Int = hertzNow
+		Field HertzElapsed:Int
+		
+		Field IsRunning:Int
+	Public
+	
+	Method Reset()
+		' Reset devices
+		Self.CPU.Reset()
+		Self.Audio.Reset()
+		Self.Input.Reset()
+		Self.Memory.Reset()
+		Self.Renderer.Reset()
+		
+		' Reset self
+		Self.IsRunning = False
+		Self.ResetTiming()
+	EndMethod
+	
+	Method ResetTiming()
+		Self.HertzNow = Millisecs()
+		Self.HertzLast = HertzNow
+	EndMethod
 	
 	Method Running:Int()
-		Return True
+		Return Self.IsRunning
 	EndMethod
 	
 	Method LoadROM:Int(path:String)
-		Return Self.Memory.LoadROM(path)
+		Self.Reset()
+		Self.IsRunning = Self.Memory.LoadROM(path)
+		Self.ResetTiming()
+		Return Self.IsRunning
 	EndMethod
 	
 	Method Update()
-		hertzNow = Millisecs()
-		hertzElapsed:+hertzNow - hertzLast
-		hertzLast = hertzNow
-		While hertzElapsed >= hertzInterval
-			hertzElapsed:-hertzInterval
-			hertzStep:+1
-			CPU.Cycle()
+		Self.HertzInterval:Double = 1000.0 / Self.CPU.hertz
+		Self.HertzNow = Millisecs()
+		Self.HertzElapsed:+HertzNow - HertzLast
+		Self.HertzLast = HertzNow
+		While Self.HertzElapsed >= Self.HertzInterval
+			Self.HertzElapsed:-Self.HertzInterval
+			Self.CPU.Cycle()
 		WEnd
 	EndMethod
 	
@@ -48,14 +71,15 @@ Type TCHIP8Machine
 			Self.CPU.MemoryPtr = Self.Memory
 			Self.CPU.RendererPtr = Self.Renderer
 		EndIf
+		Self.Reset()
 		Return Self.CPU
 	EndMethod
 	
 	Method SetKeyState(key:Int, state:Int)
-		Self.Input.SetKeyState(key,state)
+		Self.Input.SetKeyState(key, state)
 	EndMethod
 	
-	Method Render()
-		Self.Renderer.Render()
+	Method Render(width:Int = -1, height:Int = -1)
+		Self.Renderer.Render(width, height)
 	EndMethod
 EndType

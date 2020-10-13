@@ -11,7 +11,7 @@ Type TMemory
 	Field I:Int
 	
 	Method New()
-		Self.CreateSpritesInMemory()
+		Self.Reset()
 	EndMethod
 	
 	Method GetOpcodeAtIndex:Int(index:Int)
@@ -64,5 +64,12 @@ Type TMemory
 		Self.Memory[70] = $F0; Self.Memory[71] = $80; Self.Memory[72] = $F0; Self.Memory[73] = $80; Self.Memory[74] = $F0
 		' F
 		Self.Memory[75] = $F0; Self.Memory[76] = $80; Self.Memory[77] = $F0; Self.Memory[78] = $80; Self.Memory[79] = $80
+	EndMethod
+	
+	Method Reset()
+		For Local i:Int = 0 Until Self.Memory.Length
+			Self.Memory[i] = 0
+		Next
+		Self.CreateSpritesInMemory()
 	EndMethod
 EndType

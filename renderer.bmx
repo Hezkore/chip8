@@ -1,6 +1,5 @@
 SuperStrict
 
-Import brl.standardio
 Import brl.glmax2D
 
 Type TRenderer
@@ -90,12 +89,43 @@ Type TRenderer
 		Self.Image = LoadImage(Self.Pixmap, MASKEDIMAGE)
 	EndMethod
 	
-	Method Render()
+	Method Render(drawWidth:Int = -1, drawHeight:Int = -1)
+		If drawWidth = -1 And drawHeight = -1 Then
+			drawWidth = GraphicsWidth()
+			drawHeight = GraphicsHeight()
+		EndIf
 		Self.RenderFromPixmap()
+		Self.SetColor()
 		
-		SetBlend(ALPHABLEND)
+		' Cell shadow
+		SetAlpha(0.5)
+		DrawImageRect(Self.ImageBlur, drawWidth *.005, drawHeight *.0075, drawWidth, drawHeight)
+		
+		' Cell spread
+		SetAlpha(0.5)
+		DrawImageRect(Self.ImageBlur, 0, 0, drawWidth, drawHeight)
+		
+		' Scanlines
+		Local scanStep:Float = drawHeight / Self.Height
+		For Local y:Int = 0 Until drawHeight / scanStep
+			SetBlend(LIGHTBLEND)
+			SetAlpha(0.012)
+			SetColor(255, 255, 255)
+			DrawLine(0, y * scanStep + 1, drawWidth, y * scanStep + 1)
+			
+			SetBlend(ALPHABLEND)
+			SetAlpha(0.02)
+			SetColor(0, 0, 0)
+			DrawLine(0, y * scanStep, drawWidth, y * scanStep)
+		Next
+		
+		' Cell
 		Self.SetColor()
 		SetAlpha(1)
-		DrawImageRect(Self.Image, 0, 0, GraphicsWidth(), GraphicsHeight())
+		DrawImageRect(Self.Image, 0, 0, drawWidth, drawHeight)
+	EndMethod
+	
+	Method Reset()
+		Self.Clear()
 	EndMethod
 EndType
