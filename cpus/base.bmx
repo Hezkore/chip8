@@ -46,6 +46,13 @@ Type TBaseCPU
 		Self.ProgramCounter = $200
 		Self.Paused = False
 		Self.DelayTimer = 0
+		Self.ResetOpcodeUsage()
+	EndMethod
+	
+	Method ResetOpcodeUsage()
+		For Local o:TOpcode = EachIn Self.RegisteredOpcodes
+			o.Uses = 0
+		Next
 	EndMethod
 	
 	Method RegisterAsCPU(name:String)
@@ -114,8 +121,9 @@ Type TBaseCPU
 	Method ExecuteInstruction(code:Int)
 		Local opcode:TOpcode = Self.GetOpcode(code)
 		If opcode Then
-			'Print(Right(Hex(Self.ProgramCounter), 4) + " - 0x"+Right(Hex(code), 4) + " ~t (0x"+Right(Hex(opcode.Code), 4)+")" + opcode.PseudoCode)
+			Print(Right(Hex(Self.ProgramCounter), 4) + " - 0x"+Right(Hex(code), 4) + " ~t (0x"+Right(Hex(opcode.Code), 4)+")" + opcode.PseudoCode)
 			If opcode.FunctionPtr opcode.FunctionPtr(code, Self)
+			opcode.Uses:+1
 		Else
 			Local err:String = "Unknown opcode 0x" + Right(Hex(code), 4)
 			Print(err)
@@ -163,6 +171,7 @@ Type TOpcode
 	Field PseudoCode:String
 	Field Description:String
 	Field FunctionPtr(opcode:Int, cpu:TBaseCPU)
+	Field Uses:Int
 	
 	Method New(code:Int, match:Int, funcPtr(opcode:Int, cpu:TBaseCPU), pseudo:String = "UNK", desc:String = "Unknown")
 		Self.Code = code

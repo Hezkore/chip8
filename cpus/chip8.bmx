@@ -52,104 +52,128 @@ Type TCHIP8CPU Extends TBaseCPU
 		Self.RegisterOpcode($F065, $F0FF, OP_LDVxI,		"LD Vx, [I]",		"Read registers V0 through Vx from memory starting at location I")
 	EndMethod
 	
+	' Jump to a machine code routine at nnn
 	Function OP_SYSa(opcode:Int, cpu:TBaseCPU)
 	EndFunction
 	
+	' Clear the display
 	Function OP_CLS(opcode:Int, cpu:TBaseCPU)
 		cpu.RendererPtr.Clear()
 	EndFunction
 	
+	' Return from a subroutine
 	Function OP_RET(opcode:Int, cpu:TBaseCPU)
 		If cpu.MemoryPtr.Stack.Count() <= 0 Return
 		cpu.ProgramCounter = cpu.MemoryPtr.Stack.Pop()
 	EndFunction
 	
+	' Jump to location nnn
 	Function OP_JPa(opcode:Int, cpu:TBaseCPU)
 		cpu.ProgramCounter = opcode & $FFF
 	EndFunction
 	
+	' Call subroutine at nnn
 	Function OP_CALLa(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.Stack.Push(cpu.ProgramCounter)
 		cpu.ProgramCounter = opcode & $FFF
 	EndFunction
 	
+	' Skip next instruction if Vx = kk
 	Function OP_SEVxb(opcode:Int, cpu:TBaseCPU)
 		If cpu.MemoryPtr.V[cpu.GetX(opcode)] = opcode & $FF cpu.ProgressProgramCounter()
 	EndFunction
 	
+	' Skip next instruction if Vx != kk
 	Function OP_SNEVxb(opcode:Int, cpu:TBaseCPU)
 		If cpu.MemoryPtr.V[cpu.GetX(opcode)] <> opcode & $FF cpu.ProgressProgramCounter()
 	EndFunction
 	
+	' Skip next instruction if Vx = Vy
 	Function OP_SEVxVy(opcode:Int, cpu:TBaseCPU)
 		If cpu.MemoryPtr.V[cpu.GetX(opcode)] = cpu.MemoryPtr.V[cpu.GetY(opcode)] cpu.ProgressProgramCounter()
 	EndFunction
 	
+	' Set Vx = kk
 	Function OP_LDVxb(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.V[cpu.GetX(opcode)] = opcode & $FF
 	EndFunction
 	
+	' Set Vx = Vx + kk
 	Function OP_ADDVxb(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.V[cpu.GetX(opcode)]:+opcode & $FF
 	EndFunction
 	
+	' Set Vx = Vy
 	Function OP_LDVxVy(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.V[cpu.GetX(opcode)] = cpu.MemoryPtr.V[cpu.GetY(opcode)]
 	EndFunction
 	
+	' Set Vx = Vx OR Vy
 	Function OP_ORVxVy(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.V[cpu.GetX(opcode)]:|cpu.MemoryPtr.V[cpu.GetY(opcode)]
 	EndFunction
 	
+	' Set Vx = Vx AND Vy
 	Function OP_ANDVxVy(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.V[cpu.GetX(opcode)]:&cpu.MemoryPtr.V[cpu.GetY(opcode)]
 	EndFunction
 	
+	' Set Vx = Vx XOR Vy
 	Function OP_XORVxVy(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.V[cpu.GetX(opcode)]:~cpu.MemoryPtr.V[cpu.GetY(opcode)]
 	EndFunction
 	
+	' Set Vx = Vx + Vy, set VF = carry
 	Function OP_ADDVxVy(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.V[cpu.GetX(opcode)]:+cpu.MemoryPtr.V[cpu.GetY(opcode)]
 		cpu.MemoryPtr.V[$F] = cpu.MemoryPtr.v[cpu.GetX(opcode)] > $FF
 	EndFunction
 	
+	' Set Vx = Vx - Vy, set VF = NOT borrow
 	Function OP_SUBVxVy(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.V[$F] = cpu.MemoryPtr.V[cpu.GetX(opcode)] > cpu.MemoryPtr.V[cpu.GetY(opcode)]
 		cpu.MemoryPtr.V[cpu.GetX(opcode)]:-cpu.MemoryPtr.V[cpu.GetY(opcode)]
 	EndFunction
 	
+	' Set Vx = Vx SHR 1
 	Function OP_SHRVxVy(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.V[$F] = cpu.MemoryPtr.V[cpu.GetX(opcode)] & $1 > 0
 		cpu.MemoryPtr.V[cpu.GetX(opcode)]:SHR 1
 	EndFunction
 	
+	' Set Vx = Vy - Vx, set VF = NOT borrow
 	Function OP_SUBNVxVy(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.V[$F] = cpu.MemoryPtr.V[cpu.GetY(opcode)] > cpu.MemoryPtr.V[cpu.GetX(opcode)]
 		cpu.MemoryPtr.V[cpu.GetX(opcode)] = cpu.MemoryPtr.V[cpu.GetY(opcode)] - cpu.MemoryPtr.V[cpu.GetX(opcode)]
 	EndFunction
 	
+	' Set Vx = Vx SHL 1
 	Function OP_SHLVxVy(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.V[$F] = cpu.MemoryPtr.V[cpu.GetX(opcode)] & $80 > 0
 		cpu.MemoryPtr.V[cpu.GetX(opcode)]:SHL 1
 	EndFunction
 	
+	' Skip next instruction if Vx != Vy
 	Function OP_SNEVxVy(opcode:Int, cpu:TBaseCPU)
 		If cpu.MemoryPtr.V[cpu.GetX(opcode)] <> cpu.MemoryPtr.V[cpu.GetY(opcode)] cpu.ProgressProgramCounter()
 	EndFunction
 	
+	' Set I = nnn
 	Function OP_LDIa(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.I = opcode & $FFF
 	EndFunction
 	
+	' Jump to location nnn + V0
 	Function OP_JPV0a(opcode:Int, cpu:TBaseCPU)
 		cpu.ProgramCounter = (opcode & $FFF) + cpu.MemoryPtr.V[0]
 	EndFunction
 	
+	' Set Vx = random byte AND kk
 	Function OP_RNDVxb(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.V[cpu.GetX(opcode)] = Floor(Rnd() * $FF) & (opcode & $FF)
 	EndFunction
 	
+	' Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision
 	Function OP_DRWVxVyn(opcode:Int, cpu:TBaseCPU)
 		Local width:Int = 8
 		Local height:Int = opcode & $F
@@ -168,18 +192,22 @@ Type TCHIP8CPU Extends TBaseCPU
 		Next
 	EndFunction
 	
+	' Skip next instruction if key with the value of Vx is pressed
 	Function OP_SKPVx(opcode:Int, cpu:TBaseCPU)
 		If cpu.InputPtr.IsKeyDown(cpu.MemoryPtr.V[cpu.GetX(opcode)]) cpu.ProgressProgramCounter()
 	EndFunction
 	
+	' Skip next instruction if key with the value of Vx is not pressed
 	Function OP_SKNPVx(opcode:Int, cpu:TBaseCPU)
 		If Not cpu.InputPtr.IsKeyDown(cpu.MemoryPtr.V[cpu.GetX(opcode)]) cpu.ProgressProgramCounter()
 	EndFunction
 	
+	' Set Vx = delay timer value
 	Function OP_LDVxDT(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.V[cpu.GetX(opcode)] = cpu.DelayTimer
 	EndFunction
 	
+	' Wait for a key press, store the value of the key in Vx
 	Function OP_LDVxK(opcode:Int, cpu:TBaseCPU)
 		cpu.Paused = True
 		cpu.InputPtr.LastKeyHit = -1
@@ -187,34 +215,41 @@ Type TCHIP8CPU Extends TBaseCPU
 		cpu.InputPtr.WaitingForKeyToX = cpu.GetX(opcode)
 	EndFunction
 	
+	' Set delay timer = Vx
 	Function OP_LDDTVx(opcode:Int, cpu:TBaseCPU)
 		cpu.DelayTimer = cpu.MemoryPtr.V[cpu.GetX(opcode)]
 	EndFunction
 	
+	' Set sound timer = Vx
 	Function OP_LDSTVx(opcode:Int, cpu:TBaseCPU)
 		cpu.AudioPtr.Play(cpu.MemoryPtr.V[cpu.GetX(opcode)])
 	EndFunction
 	
+	' Set I = I + Vx
 	Function OP_ADDIVx(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.I:+cpu.MemoryPtr.V[cpu.GetX(opcode)]
 	EndFunction
 	
+	' Set I = location of sprite for digit Vx
 	Function OP_LDFVx(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.I = cpu.MemoryPtr.V[cpu.GetX(opcode)] * 5 ' Sprite size is 5
 	EndFunction
 	
+	' Store BCD representation of Vx in memory locations I, I+1, and I+2
 	Function OP_LDBVx(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.Memory[cpu.MemoryPtr.I] = cpu.MemoryPtr.v[cpu.GetX(opcode)] / 100
 		cpu.MemoryPtr.Memory[cpu.MemoryPtr.I + 1] = (cpu.MemoryPtr.V[cpu.GetX(opcode)] Mod 100) / 10
 		cpu.MemoryPtr.Memory[cpu.MemoryPtr.I + 2] = cpu.MemoryPtr.V[cpu.GetX(opcode)] Mod 10
 	EndFunction
 	
+	' Store registers V0 through Vx in memory starting at location I
 	Function OP_LDIVx(opcode:Int, cpu:TBaseCPU)
 		For Local index:Int = 0 To cpu.GetX(opcode)
 			cpu.MemoryPtr.Memory[cpu.MemoryPtr.I + index] = cpu.MemoryPtr.V[index]
 		Next
 	EndFunction
 	
+	' Read registers V0 through Vx from memory starting at location I
 	Function OP_LDVxI(opcode:Int, cpu:TBaseCPU)
 		For Local index:Int = 0 To cpu.GetX(opcode)
 			cpu.MemoryPtr.V[index] = cpu.MemoryPtr.Memory[cpu.MemoryPtr.I + index]

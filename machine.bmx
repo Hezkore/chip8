@@ -19,6 +19,7 @@ Type TCHIP8Machine
 		Field HertzNow:Int = Millisecs()
 		Field HertzLast:Int = hertzNow
 		Field HertzElapsed:Int
+		Field SkipUpdates:Int
 		
 		Field IsRunning:Int
 	Public
@@ -38,7 +39,9 @@ Type TCHIP8Machine
 	
 	Method ResetTiming()
 		Self.HertzNow = Millisecs()
-		Self.HertzLast = HertzNow
+		Self.HertzLast = Self.HertzNow
+		Self.HertzElapsed = 0
+		If Self.SkipUpdates <= 0 Self.SkipUpdates = 1
 	EndMethod
 	
 	Method Running:Int()
@@ -56,8 +59,13 @@ Type TCHIP8Machine
 		If Not Self.CPU Return
 		Self.HertzInterval:Double = 1000.0 / Self.CPU.hertz
 		Self.HertzNow = Millisecs()
-		Self.HertzElapsed:+HertzNow - HertzLast
-		Self.HertzLast = HertzNow
+		Self.HertzElapsed:+Self.HertzNow - Self.HertzLast
+		Self.HertzLast = Self.HertzNow
+		If Self.SkipUpdates > 0 Then
+			Self.SkipUpdates:-1
+			Self.HertzElapsed = 0
+			Return
+		EndIf
 		While Self.HertzElapsed >= Self.HertzInterval
 			Self.HertzElapsed:-Self.HertzInterval
 			Self.CPU.Cycle()
