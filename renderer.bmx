@@ -95,34 +95,33 @@ Type TRenderer
 			drawHeight = GraphicsHeight()
 		EndIf
 		Self.RenderFromPixmap()
-		Self.SetColor()
+		'Self.SetColor()
+		'SetBlend(ALPHABLEND)
+		'Cls()
 		
 		' Cell shadow
-		SetAlpha(0.5)
-		DrawImageRect(Self.ImageBlur, drawWidth *.005, drawHeight *.0075, drawWidth, drawHeight)
+		'SetAlpha(0.75)
+		'DrawImageRect(Self.ImageBlur, drawWidth *.004, drawHeight *.0065, drawWidth, drawHeight)
 		
 		' Cell spread
-		SetAlpha(0.5)
-		DrawImageRect(Self.ImageBlur, 0, 0, drawWidth, drawHeight)
-		
-		' Scanlines
-		Local scanStep:Float = drawHeight / Self.Height
-		For Local y:Int = 0 Until drawHeight / scanStep
-			SetBlend(LIGHTBLEND)
-			SetAlpha(0.012)
-			SetColor(255, 255, 255)
-			DrawLine(0, y * scanStep + 1, drawWidth, y * scanStep + 1)
-			
-			SetBlend(ALPHABLEND)
-			SetAlpha(0.02)
-			SetColor(0, 0, 0)
-			DrawLine(0, y * scanStep, drawWidth, y * scanStep)
-		Next
+		'SetAlpha(0.75)
+		'DrawImageRect(Self.ImageBlur, 0, 0, drawWidth, drawHeight)
 		
 		' Cell
-		Self.SetColor()
-		SetAlpha(1)
-		DrawImageRect(Self.Image, 0, 0, drawWidth, drawHeight)
+		'SetAlpha(1)
+		'DrawImageRect(Self.Image, 0, 0, drawWidth, drawHeight)
+		
+		' Scanlines
+		'SetAlpha(0.1)
+		'SetColor(Self.Background[0], Self.Background[1], Self.Background[2])
+		'Local scanStep:Float = drawHeight / Self.Height
+		'For Local y:Int = 0 Until drawHeight / scanStep
+		'	DrawLine(0, y * scanStep, drawWidth, y * scanStep)
+		'Next
+		'scanStep = drawWidth / Self.Width
+		'For Local x:Int = 0 Until drawWidth / scanStep
+		'	DrawLine(x * scanStep, 0, x * scanStep, drawHeight)
+		'Next
 	EndMethod
 	
 	Method Reset()

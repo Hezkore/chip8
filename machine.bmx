@@ -25,11 +25,11 @@ Type TCHIP8Machine
 	
 	Method Reset()
 		' Reset devices
-		Self.CPU.Reset()
-		Self.Audio.Reset()
-		Self.Input.Reset()
-		Self.Memory.Reset()
-		Self.Renderer.Reset()
+		If Self.CPU Self.CPU.Reset()
+		If Self.Audio Self.Audio.Reset()
+		If Self.Input Self.Input.Reset()
+		If Self.Memory Self.Memory.Reset()
+		If Self.Renderer Self.Renderer.Reset()
 		
 		' Reset self
 		Self.IsRunning = False
@@ -53,6 +53,7 @@ Type TCHIP8Machine
 	EndMethod
 	
 	Method Update()
+		If Not Self.CPU Return
 		Self.HertzInterval:Double = 1000.0 / Self.CPU.hertz
 		Self.HertzNow = Millisecs()
 		Self.HertzElapsed:+HertzNow - HertzLast

@@ -35,6 +35,7 @@ Type TWindow
 					SetViewport(0,0, ClientWidth(Self.Canvas), ClientHeight(Self.Canvas))
 					Cls()
 					machine.Render()
+					DrawImageRect(machine.Renderer.Image, 0, 0, GraphicsWidth(), GraphicsHeight())
 					Flip(1)
 					
 				Case EVENT_WINDOWACCEPT
