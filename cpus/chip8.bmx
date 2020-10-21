@@ -80,17 +80,20 @@ Type TCHIP8CPU Extends TBaseCPU
 	
 	' Skip next instruction if Vx = kk
 	Function OP_SEVxb(opcode:Int, cpu:TBaseCPU)
-		If cpu.MemoryPtr.V[cpu.GetX(opcode)] = opcode & $FF cpu.ProgressProgramCounter()
+		If cpu.MemoryPtr.V[cpu.GetX(opcode)] = opcode & $FF..
+			cpu.ProgressProgramCounter()
 	EndFunction
 	
 	' Skip next instruction if Vx != kk
 	Function OP_SNEVxb(opcode:Int, cpu:TBaseCPU)
-		If cpu.MemoryPtr.V[cpu.GetX(opcode)] <> opcode & $FF cpu.ProgressProgramCounter()
+		If cpu.MemoryPtr.V[cpu.GetX(opcode)] <> opcode & $FF..
+			cpu.ProgressProgramCounter()
 	EndFunction
 	
 	' Skip next instruction if Vx = Vy
 	Function OP_SEVxVy(opcode:Int, cpu:TBaseCPU)
-		If cpu.MemoryPtr.V[cpu.GetX(opcode)] = cpu.MemoryPtr.V[cpu.GetY(opcode)] cpu.ProgressProgramCounter()
+		If cpu.MemoryPtr.V[cpu.GetX(opcode)] = cpu.MemoryPtr.V[cpu.GetY(opcode)]..
+			cpu.ProgressProgramCounter()
 	EndFunction
 	
 	' Set Vx = kk
@@ -124,12 +127,15 @@ Type TCHIP8CPU Extends TBaseCPU
 	EndFunction
 	
 	' Set Vx = Vx + Vy, set VF = carry
+	' FIX wrong?
 	Function OP_ADDVxVy(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.V[cpu.GetX(opcode)]:+cpu.MemoryPtr.V[cpu.GetY(opcode)]
-		cpu.MemoryPtr.V[$F] = cpu.MemoryPtr.v[cpu.GetX(opcode)] > $FF
+		'cpu.MemoryPtr.V[$F] = cpu.MemoryPtr.V[cpu.GetX(opcode)] > cpu.MemoryPtr.V[cpu.GetY(opcode)]
+		'cpu.MemoryPtr.V[$F] = cpu.MemoryPtr.v[cpu.GetX(opcode)] > $FF
 	EndFunction
 	
 	' Set Vx = Vx - Vy, set VF = NOT borrow
+	' FIX wrong?
 	Function OP_SUBVxVy(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.V[$F] = cpu.MemoryPtr.V[cpu.GetX(opcode)] > cpu.MemoryPtr.V[cpu.GetY(opcode)]
 		cpu.MemoryPtr.V[cpu.GetX(opcode)]:-cpu.MemoryPtr.V[cpu.GetY(opcode)]

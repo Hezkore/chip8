@@ -11,7 +11,7 @@ Local MainWindow:TWindow = New TWindow
 ' Create the CHIP-8 machine
 Local Machine:TCHIP8Machine = New TCHIP8Machine
 Machine.ChangeCPU("CHIP-8")
-'Machine.LoadROM("dev/RUSH_HOUR")
+Machine.LoadROM("dev/RUSH_HOUR")
 
 ' Wait for ROM
 Repeat 
