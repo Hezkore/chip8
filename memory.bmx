@@ -21,11 +21,11 @@ Type TMemory
 	
 	Method LoadROM:Int(path:String)
 		If Not FileType(path) Return False
-		Self.LoadProgram(LoadString(path))
+		Self.LoadData(LoadString(path))
 		Return True
 	EndMethod
 	
-	Method LoadProgram(data:String)
+	Method LoadData(data:String)
 		For Local i:Int = 0 Until data.Length
 			Self.Memory[$200 + i] = data[i]
 		Next

@@ -26,20 +26,12 @@ Type TWindow
 			Select EventID()
 				Case EVENT_KEYDOWN
 					machine.SetKeyState(EventData(), True)
-					'If EventData() = KEY_SPACE Then
-					'	Local txt:String
-					'	For Local o:TOpcode = EachIn machine.CPU.RegisteredOpcodes
-					'		txt:+o.PseudoCode
-					'		txt:+" (" + o.Uses + ")"
-					'		txt:+"~n"
-					'	Next
-					'	Print txt
-					'EndIf
 					
 				Case EVENT_KEYUP
 					machine.SetKeyState(EventData(), False)
 					
 				Case EVENT_GADGETPAINT
+					ActivateGadget(canvas)
 					SetGraphics(CanvasGraphics(Self.Canvas))
 					SetViewport(0,0, ClientWidth(Self.Canvas), ClientHeight(Self.Canvas))
 					SetBlend(ALPHABLEND)
@@ -76,6 +68,7 @@ Type TWindow
 					Flip(1)
 					
 				Case EVENT_WINDOWACCEPT
+					ActivateGadget(canvas)
 					If Not Machine.LoadROM(EventText()) Then
 						Notify("Unable to load ~q"+EventText()+"~q")
 					EndIf

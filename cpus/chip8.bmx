@@ -127,15 +127,13 @@ Type TCHIP8CPU Extends TBaseCPU
 	EndFunction
 	
 	' Set Vx = Vx + Vy, set VF = carry
-	' FIX wrong?
 	Function OP_ADDVxVy(opcode:Int, cpu:TBaseCPU)
-		cpu.MemoryPtr.V[cpu.GetX(opcode)]:+cpu.MemoryPtr.V[cpu.GetY(opcode)]
-		'cpu.MemoryPtr.V[$F] = cpu.MemoryPtr.V[cpu.GetX(opcode)] > cpu.MemoryPtr.V[cpu.GetY(opcode)]
-		'cpu.MemoryPtr.V[$F] = cpu.MemoryPtr.v[cpu.GetX(opcode)] > $FF
+		Local sum:Int = cpu.MemoryPtr.V[cpu.GetX(opcode)] + cpu.MemoryPtr.V[cpu.GetY(opcode)]
+		cpu.MemoryPtr.V[$F] = sum > $FF
+		cpu.MemoryPtr.V[cpu.GetX(opcode)] = sum
 	EndFunction
 	
 	' Set Vx = Vx - Vy, set VF = NOT borrow
-	' FIX wrong?
 	Function OP_SUBVxVy(opcode:Int, cpu:TBaseCPU)
 		cpu.MemoryPtr.V[$F] = cpu.MemoryPtr.V[cpu.GetX(opcode)] > cpu.MemoryPtr.V[cpu.GetY(opcode)]
 		cpu.MemoryPtr.V[cpu.GetX(opcode)]:-cpu.MemoryPtr.V[cpu.GetY(opcode)]

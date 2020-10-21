@@ -121,7 +121,7 @@ Type TBaseCPU
 	Method ExecuteInstruction(code:Int)
 		Local opcode:TOpcode = Self.GetOpcode(code)
 		If opcode Then
-			Print(Right(Hex(Self.ProgramCounter), 4) + " - 0x"+Right(Hex(code), 4) + " ~t (0x"+Right(Hex(opcode.Code), 4)+")" + opcode.PseudoCode)
+			'Print(Right(Hex(Self.ProgramCounter), 4) + " - 0x"+Right(Hex(code), 4) + " ~t (0x"+Right(Hex(opcode.Code), 4)+")" + opcode.PseudoCode)
 			If opcode.FunctionPtr opcode.FunctionPtr(code, Self)
 			opcode.Uses:+1
 		Else

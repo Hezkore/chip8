@@ -24,6 +24,11 @@ Type TCHIP8Machine
 		Field IsRunning:Int
 	Public
 	
+	Method New()
+		Self.ChangeCPU(..
+			TBaseCPU(TBaseCPU.RegisteredCPUs.First()).Name)
+	EndMethod
+	
 	Method Reset()
 		' Reset devices
 		If Self.CPU Self.CPU.Reset()
@@ -53,6 +58,12 @@ Type TCHIP8Machine
 		Self.IsRunning = Self.Memory.LoadROM(path)
 		Self.ResetTiming()
 		Return Self.IsRunning
+	EndMethod
+	
+	Method LoadData(data:String)
+		Self.Reset()
+		Self.IsRunning = True
+		Self.Memory.LoadData(data)
 	EndMethod
 	
 	Method Update()
