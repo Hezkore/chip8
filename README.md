@@ -1,7 +1,7 @@
 # CHIP-8
 A [CHIP-8](https://en.wikipedia.org/wiki/CHIP-8) emulator written in [BlitzMax NG](https://blitzmax.org/).
 
-![](https://github.com/Hezkore/chip8/blob/master/demo.png)
+![Title Image](https://github.com/Hezkore/chip8/blob/master/demo.png)
 
 ## CPU
 **Supported**
